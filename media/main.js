@@ -5,6 +5,7 @@ let cardOnTable = null;
 let graveyard = [];
 let playerDeck = [];
 let cpuDeck = []
+let moves = 1
 
 function Card(number, suit, color) {
     this.number = number;
@@ -83,39 +84,85 @@ function firstCard() {
             check = true;
             var cardDiv = document.createElement('div');
             cardDiv.id = card.number;
-            cardDiv.className = "card";
+            cardDiv.id = "card-table";
             cardDiv.innerHTML = `${card.number}${card.symbol}`.fontcolor(card.color);
             document.getElementById("table").appendChild(cardDiv);
         }
     }
 }
 
-//Show cards on html page
+//Display card on a table no matter if first or another one
+function displayTableCard() {
+    var card = cardOnTable
+    var cardDiv = document.getElementById("card-table")
+    cardDiv.innerHTML = `${card.number}${card.symbol}`.fontcolor(card.color);
+}
+
+//Adding message to logs
+function displayLog(move, message) {
+    var cardDiv = document.getElementById("logs")
+    cardDiv += cardDiv.innerHTML += `${move}:  ${message}`
+    moves++
+}
+
+//Take card on command
+function takeCards(array, player, amount) {
+    for (i=0; i<amount; i++) {
+        card = deck[deck.length-1];
+        deck.pop(card);
+        array.push(card);
+    }
+    displayLog(moves,`${cardOnTable.number}${cardOnTable.symbol} ${player} takes this amount of cards: ${amount} || `)
+    if (player === "player") {
+        displayCards(playerDeck, 'player');
+        cpuTurn()
+    }
+    displayCards(cpuDeck, "cpu");
+}
+
+//Show or refresh decks on html page
 function displayCards(array, div) {
     document.getElementById(div).innerHTML = ""
     for (var i = 0; i < array.length; i++) {
         var card = array[i]
         var cardDiv = document.createElement('div');
-        cardDiv.id = card.number;
-        cardDiv.className = "card";
-        cardDiv.innerHTML = `${card.number}${card.symbol}`.fontcolor(card.color);
-        cardDiv.setAttribute("onclick", `checkCorrectMove('${card.number}', '${card.suit}')`);
+        if (array === playerDeck) {
+            cardDiv.id = card.number;
+            cardDiv.className = "card";
+            cardDiv.innerHTML = `${card.number}${card.symbol}`.fontcolor(card.color);
+            cardDiv.setAttribute("onclick", `checkCorrectMove('${card.number}', '${card.suit}')`);
+        } else {
+            cardDiv.className = "card-hidden"; 
+            cardDiv.innerHTML = "CPU";
+        }
+
         document.getElementById(div).appendChild(cardDiv); 
     }
 }
 
+//This is when computer plays
 function cpuTurn() {
+    if (deck.length === 0) {
+        shuffle(graveyard);
+        deck = graveyard
+        graveyard = []
+        document.getElementById("grave").innerHTML = ""
+    }
+    
     check = false;
     for (let i = 0; i < cpuDeck.length; i++) {
-        if (cpuDeck[i].number === cardOnTable.number || cpuDeck[i].suit === cardOnTable.suit) {
+        var card = cpuDeck[i];
+        if (card.number === cardOnTable.number || card.suit === cardOnTable.suit) {
             check = true;
             graveyard.push(cardOnTable);
-            cardOnTable = cpuDeck[i]
-            var cardDiv = document.createElement('div');
-            cardDiv.className = "card-hidden";
-            cardDiv.id = "grave"
-            cardDiv.innerHTML = "Grave";
-            document.getElementById("table").appendChild(cardDiv); 
+            cardOnTable = card
+            if (graveyard.length == 1) {
+                var cardDiv = document.createElement('div');
+                cardDiv.className = "card-hidden";
+                cardDiv.id = "grave"
+                cardDiv.innerHTML = "Grave";
+                document.getElementById("table").appendChild(cardDiv); 
+            }
 
             for(var z = 0; z < cpuDeck.length; z++) { 
                 if (cpuDeck[z] === cardOnTable) {
@@ -125,30 +172,89 @@ function cpuTurn() {
             break;
         }
     }
+
     if (check === false) {
-            card = deck[deck.length-1];
-            deck.pop(card);
-            cpuDeck.push(card);
+        takeCards(cpuDeck, "cpu", 1)
+    } else {
+        if (playerDeck.length === 0) {
+            alert("Computer has won!")
+        } else if (card.number === '2'){
+            takeCards(playerDeck, "player", 2);          
+        } else if (card.number === '3'){
+            takeCards(playerDeck, "player", 3); 
+        } else if (card.number === '4') {
+            cpuTurn()
+            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} player misses his turn || `)
+        } else if (card.number === "K" && (card.suit === "spades" || card.suit === "hearts")) {
+            takeCards(playerDeck, "player", 5)
+        } else {
+            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} player's turn || `)
+        }
     }
+
+
     displayCards(cpuDeck, "cpu");
+    displayTableCard();
 }
 
+//This functions checks if player made a correct move
 function checkCorrectMove(number, suit) {
+    if (deck.length === 0) {
+        shuffle(graveyard);
+        deck = graveyard
+        graveyard = []
+        document.getElementById("grave").innerHTML = ""
+    }
+    
     var check = false;
-    var deckIndex = playerDeck.length-1;
-    while (check === false || deckIndex <= 0) {
-        console.log(deckIndex)
+    var deckIndex = 0;
+    while (check === false || deckIndex > playerDeck.length) {
         if (playerDeck[deckIndex].number == number && playerDeck[deckIndex].suit == suit) {
             var card = playerDeck[deckIndex];
             check = true;
             console.log(check)
         }
-        deckIndex--;
+        deckIndex++;
     }
-    if (check === true) {
-        alert("Incorrect choice, try again or take anoter card!")
-    }
-    
+
+    if (card.number === cardOnTable.number || card.symbol === cardOnTable.symbol) {
+        graveyard.push(cardOnTable);
+        cardOnTable = card
+        if (graveyard.length == 1) {
+            var cardDiv = document.createElement('div');
+            cardDiv.className = "card-hidden";
+            cardDiv.id = "grave"
+            cardDiv.innerHTML = "Grave";
+            document.getElementById("table").appendChild(cardDiv); 
+        }
+
+        for(var z = 0; z < cpuDeck.length; z++) { 
+            if (playerDeck[z] === cardOnTable) {
+                playerDeck.splice(z,1);
+            }
+        }
+        displayTableCard()
+        displayCards(playerDeck, 'player');
+        if (playerDeck.length === 0) {
+            alert("You have won!")
+        } else if (card.number === '2'){
+            takeCards(cpuDeck, "cpu", 2);          
+        } else if (card.number === '3'){
+            takeCards(cpuDeck, "cpu", 3); 
+        } else if (card.number === '4') {
+            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} cpu misses his turn || `)
+        } else if (card.number === "K" && (card.suit === "spades" || card.suit === "hearts")) {
+            takeCards(cpuDeck, "cpu", 5)
+        }
+        else {
+            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} cpu's turn || `)
+            cpuTurn()
+        }
+
+    } else {
+        alert('Wrong move! Chose anoter card or take one from the deck')
+    }   
+     
 }
 
 //game
@@ -158,17 +264,3 @@ fiveCardsForPlayer(cpuDeck);
 displayCards(cpuDeck, "cpu");
 firstCard();
 displayCards(playerDeck, 'player');
-cpuTurn();
-
-if (deck.length === 0) {
-    shuffle(graveyard);
-    deck = graveyard
-    graveyard = []
-    document.getElementById("grave").innerHTML = ""
-}
-
-console.log(deck)
-console.log(playerDeck)
-console.log(cpuDeck)
-console.log(cardOnTable)
-console.log(graveyard)
