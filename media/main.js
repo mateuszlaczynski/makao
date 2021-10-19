@@ -176,6 +176,7 @@ function cpuTurn() {
     } else {
         if (playerDeck.length === 0) {
             alert("Computer has won!")
+            reloadGame()
         } else if (card.number === '2'){
             takeCards(playerDeck, "player", 2);          
         } else if (card.number === '3'){
@@ -218,13 +219,7 @@ function checkCorrectMove(number, suit) {
     if (card.number === cardOnTable.number || card.symbol === cardOnTable.symbol || card.number === "Q") {
         graveyard.push(cardOnTable);
         cardOnTable = card
-        if (graveyard.length == 1) {
-            var cardDiv = document.createElement('div');
-            cardDiv.className = "card-hidden";
-            cardDiv.id = "grave"
-            cardDiv.innerHTML = "Grave";
-            document.getElementById("table").appendChild(cardDiv); 
-        }
+
 
         for(var z = 0; z < cpuDeck.length; z++) { 
             if (playerDeck[z] === cardOnTable) {
@@ -235,6 +230,7 @@ function checkCorrectMove(number, suit) {
         displayCards(playerDeck, 'player');
         if (playerDeck.length === 0) {
             alert("You have won!")
+            reloadGame()
         } else if (card.number === '2'){
             takeCards(cpuDeck, "cpu", 2);          
         } else if (card.number === '3'){
