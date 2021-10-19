@@ -1,13 +1,12 @@
 .table {
     width: auto;
-    height: auto;
+    height: 175px;
     margin: 0 auto;
     padding: 10px;
     position: relative;
     margin-top: auto;
     text-align: center;
-    display: block;
-    margin-bottom:200px
+    margin-bottom:10px;
 }
 
 .card {
@@ -52,4 +51,11 @@
     float: left;
     margin:5px;
     background-color:brown;
+}
+
+#rules {
+    width: 100%;
+    text-align: center;
+    display: inline-block;
+    margin-top: 50px;
 }

@@ -53,6 +53,11 @@ function shuffle(array) {
     return array
 }
 
+//New game by reloading page
+function reloadGame() {
+    window.location.reload(true);
+}
+
 
 //Give 5 cards for each player
 function fiveCardsForPlayer(array){
@@ -112,7 +117,7 @@ function takeCards(array, player, amount) {
         deck.pop(card);
         array.push(card);
     }
-    displayLog(moves,`${cardOnTable.number}${cardOnTable.symbol} ${player} takes this amount of cards: ${amount} || `)
+    displayLog(moves,`${cardOnTable.number}${cardOnTable.symbol} ${player} takes this amount of cards: ${amount}.<br>`)
     if (player === "player") {
         displayCards(playerDeck, 'player');
         cpuTurn()
@@ -140,7 +145,7 @@ function displayCards(array, div) {
     }
 }
 
-//This is when computer plays
+//This is where computer plays
 function cpuTurn() {
     if (deck.length === 0) {
         shuffle(graveyard);
@@ -152,17 +157,10 @@ function cpuTurn() {
     check = false;
     for (let i = 0; i < cpuDeck.length; i++) {
         var card = cpuDeck[i];
-        if (card.number === cardOnTable.number || card.suit === cardOnTable.suit) {
+        if (card.number === cardOnTable.number || card.suit === cardOnTable.suit || card.number === "Q") {
             check = true;
             graveyard.push(cardOnTable);
             cardOnTable = card
-            if (graveyard.length == 1) {
-                var cardDiv = document.createElement('div');
-                cardDiv.className = "card-hidden";
-                cardDiv.id = "grave"
-                cardDiv.innerHTML = "Grave";
-                document.getElementById("table").appendChild(cardDiv); 
-            }
 
             for(var z = 0; z < cpuDeck.length; z++) { 
                 if (cpuDeck[z] === cardOnTable) {
@@ -184,11 +182,11 @@ function cpuTurn() {
             takeCards(playerDeck, "player", 3); 
         } else if (card.number === '4') {
             cpuTurn()
-            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} player misses his turn || `)
+            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} player misses his turn.<br>`)
         } else if (card.number === "K" && (card.suit === "spades" || card.suit === "hearts")) {
             takeCards(playerDeck, "player", 5)
         } else {
-            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} player's turn || `)
+            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} player's turn.<br>`)
         }
     }
 
@@ -203,7 +201,7 @@ function checkCorrectMove(number, suit) {
         shuffle(graveyard);
         deck = graveyard
         graveyard = []
-        document.getElementById("grave").innerHTML = ""
+
     }
     
     var check = false;
@@ -217,7 +215,7 @@ function checkCorrectMove(number, suit) {
         deckIndex++;
     }
 
-    if (card.number === cardOnTable.number || card.symbol === cardOnTable.symbol) {
+    if (card.number === cardOnTable.number || card.symbol === cardOnTable.symbol || card.number === "Q") {
         graveyard.push(cardOnTable);
         cardOnTable = card
         if (graveyard.length == 1) {
@@ -242,12 +240,12 @@ function checkCorrectMove(number, suit) {
         } else if (card.number === '3'){
             takeCards(cpuDeck, "cpu", 3); 
         } else if (card.number === '4') {
-            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} cpu misses his turn || `)
+            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} cpu misses his turn.<br>`)
         } else if (card.number === "K" && (card.suit === "spades" || card.suit === "hearts")) {
             takeCards(cpuDeck, "cpu", 5)
         }
         else {
-            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} cpu's turn || `)
+            displayLog(moves, `${cardOnTable.number}${cardOnTable.symbol} cpu's turn.<br>`)
             cpuTurn()
         }
 
